@@ -39,9 +39,9 @@ This repository contains a **production-ready AWS infrastructure** setup using T
 
 ````
 
-- **modules/**: Contains reusable Terraform modules.
-- **environments/**: Environment-specific Terraform configurations.
-- **main.tf / terraform.tfvars**: Deploy environment-specific infrastructure.
+- **modules/** → Contains reusable Terraform modules  
+- **environments/** → Environment-specific configurations (`dev`, `prod`)  
+- **main.tf / terraform.tfvars** → Deploy infra per environment  
 
 ---
 
@@ -49,11 +49,11 @@ This repository contains a **production-ready AWS infrastructure** setup using T
 
 - [Terraform 1.5+](https://www.terraform.io/downloads)
 - [AWS CLI](https://aws.amazon.com/cli/)
-- An AWS account with sufficient IAM permissions to create:
+- AWS account with permissions for:
   - VPC, Subnets, Route Tables
   - EC2, Security Groups, ALB
   - RDS, Secrets Manager
-  - CloudWatch and SNS
+  - CloudWatch, SNS
 
 ---
 
@@ -84,51 +84,49 @@ terraform plan -var-file="terraform.tfvars"
 terraform apply -var-file="terraform.tfvars"
 ```
 
-> Each environment is isolated and can be managed independently using its own `tfvars` file.
-
 ---
 
 ## Module Overview
 
-### VPC Module
+### VPC
 
-* Creates a VPC with public and private subnets.
-* Configures Internet Gateway and NAT Gateway for outbound internet access.
-* Ensures private subnets for EC2 and RDS instances.
+* Creates VPC, public & private subnets
+* Configures IGW + NAT Gateway
+* Private subnets for EC2 & RDS
 
-### ALB Module
+### ALB
 
-* Internet-facing Application Load Balancer in public subnets.
-* Routes traffic to private EC2 instances.
-* Configurable health checks.
+* Internet-facing ALB in public subnets
+* Routes traffic to EC2 in private subnets
+* Health checks configurable
 
-### EC2 Module
+### EC2
 
-* Launch Template + Auto Scaling Group.
-* User-data script bootstraps HTTP server.
-* CloudWatch metrics and alarms integrated.
-* Supports scaling policies (scale up/down based on CPU).
+* Launch Template + Auto Scaling Group
+* User-data bootstraps web server
+* Scaling policies: CPU thresholds
+* CloudWatch alarms integrated
 
-### RDS Module
+### RDS
 
-* MySQL database in private subnet.
-* Secure credentials using AWS Secrets Manager.
-* Configurable instance size per environment.
+* MySQL database in private subnet
+* Credentials stored in Secrets Manager
+* Configurable instance size
 
-### Monitoring Module
+### Monitoring
 
 * CloudWatch alarms for:
 
-  * EC2 Auto Scaling CPU usage
-  * RDS CPU and storage
-  * Optional ALB target group health checks
-* Alerts sent via SNS topic to configured emails.
+  * ASG CPU utilization
+  * RDS CPU/storage
+  * ALB target group health
+* Alerts via SNS (email)
 
 ---
 
-## Environment Variables & `terraform.tfvars`
+## Example `terraform.tfvars`
 
-Example `dev/terraform.tfvars`:
+### Dev
 
 ```hcl
 environment        = "dev"
@@ -139,7 +137,7 @@ db_instance_class  = "db.t3.micro"
 alert_emails       = ["youremail@example.com"]
 ```
 
-Example `prod/terraform.tfvars`:
+### Prod
 
 ```hcl
 environment        = "prod"
@@ -147,47 +145,55 @@ region             = "us-east-1"
 instance_type      = "t3.medium"
 desired_capacity   = 2
 db_instance_class  = "db.t3.medium"
-alert_emails       = ["youremail@example.com"]
+alert_emails       = ["alerts@example.com"]
 ```
 
 ---
 
 ## Security Considerations
 
-* **Private subnets** for EC2 and RDS.
-* **Secrets Manager** used for storing database passwords.
-* Security groups restrict access:
+* Private subnets for EC2 & RDS
+* DB credentials managed with Secrets Manager
+* Security groups:
 
-  * ALB allows HTTP from the internet.
-  * EC2 allows HTTP only from ALB.
+  * ALB: allows HTTP/HTTPS from the internet
+  * EC2: allows traffic only from ALB
+  * RDS: allows traffic only from EC2
 
 ---
 
 ## Troubleshooting
 
-* If Auto Scaling Group instances are **not registering as healthy**:
+* **ASG not registering in ALB?**
 
-  * Check that ALB security group allows traffic to EC2.
-  * Ensure the EC2 user-data script correctly sets up the app.
+  * Check EC2 health checks
+  * Verify security group rules
 
-* For CloudWatch alarms:
+* **CloudWatch alarms not triggering?**
 
-  * Ensure the ASG name and scaling policy ARNs are passed to the monitoring module.
+  * Ensure correct ASG name & scaling policy ARNs passed to monitoring module
 
 ---
 
 ## Contributing
 
-1. Fork the repository
-2. Create a new branch: `git checkout -b feature/my-feature`
-3. Commit your changes: `git commit -m "Add new feature"`
-4. Push to your branch: `git push origin feature/my-feature`
-5. Open a Pull Request
+1. Fork repo
+2. Create branch: `git checkout -b feature/my-feature`
+3. Commit: `git commit -m "Add new feature"`
+4. Push: `git push origin feature/my-feature`
+5. Open PR
 
 ---
 
 ## License
 
-This project is licensed under the MIT License.
+Licensed under the MIT License.
 
+```
+
+---
+
+⚡ Now it’s fully structured in Markdown — heading hierarchy, code blocks, and lists are all GitHub-ready.  
+
+Want me to also add a **diagram section** (with `![architecture diagram](docs/diagram.png)`) so that when you generate/upload a diagram later, it will render automatically on GitHub?
 ```
