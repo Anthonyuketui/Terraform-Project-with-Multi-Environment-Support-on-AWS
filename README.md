@@ -1,4 +1,3 @@
-```markdown
 # Production-Ready Terraform Project with Multi-Environment Support
 
 This repository contains a **production-ready AWS infrastructure** setup using Terraform, designed to support multiple environments (`dev` and `prod`). The infrastructure is modular, secure, and scalable with monitoring and auto-scaling capabilities.
@@ -188,12 +187,3 @@ alert_emails       = ["alerts@example.com"]
 ## License
 
 Licensed under the MIT License.
-
-```
-
----
-
-⚡ Now it’s fully structured in Markdown — heading hierarchy, code blocks, and lists are all GitHub-ready.  
-
-Want me to also add a **diagram section** (with `![architecture diagram](docs/diagram.png)`) so that when you generate/upload a diagram later, it will render automatically on GitHub?
-```
