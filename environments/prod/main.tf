@@ -1,12 +1,15 @@
 terraform {
-  required_version = ">= 1.5.0"
   required_providers {
-    aws = { source = "hashicorp/aws", version = ">= 5.0" }
+    aws = {
+      source  = "hashicorp/aws"
+      version = "6.11.0"
+    }
   }
 }
 
-provider "aws" { region = var.region }
-
+provider "aws" {
+  region = var.region
+}
 # Use latest Amazon Linux 2 AMI
 data "aws_ami" "al2" {
   most_recent = true
@@ -58,8 +61,6 @@ module "ec2" {
   max_size         = var.max_size
   desired_capacity = var.desired_capacity
   user_data       = local.user_data
-  scale_up_cpu_threshold   = var.scale_up_cpu_threshold
-  scale_down_cpu_threshold = var.scale_down_cpu_threshold
 }
 
 module "rds" {
@@ -86,6 +87,12 @@ module "monitoring" {
   env         = var.environment
   asg_name    = module.ec2.asg_name
   rds_instance_id = module.rds.db_identifier
+  scale_up_cpu_threshold   = var.scale_up_cpu_threshold
+  scale_down_cpu_threshold = var.scale_down_cpu_threshold
+
+  # Pass scaling policy ARNs
+  scale_up_policy_arn   = module.ec2.scale_up_policy_arn
+  scale_down_policy_arn = module.ec2.scale_down_policy_arn
 
   # Optional ALB metrics (only if your alb module exports these)
   alb_arn_suffix          = try(module.alb.alb_arn_suffix, "")
