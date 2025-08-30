@@ -15,19 +15,16 @@ variable "alert_emails" {
   default     = []
 }
 
-# Auto Scaling Group
 variable "asg_name" {
   description = "Name of the Auto Scaling Group to monitor"
   type        = string
 }
 
-# RDS
 variable "rds_instance_id" {
   description = "RDS instance identifier (e.g., dev-db)"
   type        = string
 }
 
-# ALB (optional)
 variable "alb_arn_suffix" {
   description = "ARN suffix of the ALB (from aws_lb.arn_suffix)"
   type        = string

@@ -33,11 +33,11 @@ resource "aws_security_group" "db_sg" {
 
 resource "random_password" "db_password" {
   length           = 16
-  override_special = "!#$%&*()-_=+"  # Only RDS-safe special characters
-  upper            = true             # Include uppercase letters
-  lower            = true             # Include lowercase letters
-  numeric           = true             # Include numbers
-  special          = true             # Enable special characters
+  override_special = "!#$%&*()-_=+" 
+  upper            = true            
+  lower            = true             
+  numeric           = true         
+  special          = true             
 }
 
 
@@ -59,7 +59,7 @@ resource "aws_db_instance" "this" {
   storage_type               = "gp2"
   username                   = var.db_username
   db_name                    = var.db_name
-  password                   = random_password.db_password.result   # ✅ Use random_password directly
+  password                   = random_password.db_password.result 
   multi_az                   = var.multi_az
   backup_retention_period    = var.backup_retention_days
   maintenance_window         = var.maintenance_window

@@ -1,6 +1,3 @@
-# ========================
-# Global / Environment
-# ========================
 variable "environment" {
   description = "Deployment environment (e.g., dev, staging, prod)"
   type        = string
@@ -12,9 +9,8 @@ variable "region" {
 }
 
 
-# ========================
+
 # Networking
-# ========================
 variable "vpc_cidr" {
   description = "CIDR block for the VPC"
   type        = string
@@ -35,9 +31,7 @@ variable "azs" {
   type        = list(string)
 }
 
-# ========================
 # Compute / Auto Scaling
-# ========================
 variable "instance_type" {
   description = "EC2 instance type for the ASG"
   type        = string

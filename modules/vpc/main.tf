@@ -44,17 +44,11 @@ resource "aws_route_table_association" "public" {
   route_table_id = aws_route_table.public.id
 }
 
-# -----------------------------
-# Single NAT Gateway for private subnets
-# -----------------------------
-
-# Allocate an Elastic IP for the NAT
 resource "aws_eip" "nat" {
   tags = { Name = "${var.env}-nat-eip" }
   depends_on = [aws_internet_gateway.this]
 }
 
-# NAT Gateway in the first public subnet
 resource "aws_nat_gateway" "this" {
   allocation_id = aws_eip.nat.id
   subnet_id     = aws_subnet.public[0].id
@@ -65,20 +59,18 @@ resource "aws_nat_gateway" "this" {
   depends_on = [aws_internet_gateway.this]
 }
 
-# Private route table
 resource "aws_route_table" "private" {
   vpc_id = aws_vpc.this.id
   tags   = { Name = "${var.env}-private-rt" }
 }
 
-# Default route for private subnets via NAT
 resource "aws_route" "private_internet_via_nat" {
   route_table_id         = aws_route_table.private.id
   destination_cidr_block = "0.0.0.0/0"
   nat_gateway_id         = aws_nat_gateway.this.id
 }
 
-# Associate all private subnets to the private route table
+
 resource "aws_route_table_association" "private_assoc" {
   count          = length(aws_subnet.private)
   subnet_id      = aws_subnet.private[count.index].id

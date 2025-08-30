@@ -1,14 +1,8 @@
-# ========================
-# Environment
-# ========================
 variable "env" {
   description = "Deployment environment (e.g., dev, staging, prod)"
   type        = string
 }
-
-# ========================
-# Networking
-# ========================
+#Networking
 variable "vpc_id" {
   description = "VPC ID where resources will be created"
   type        = string
@@ -29,9 +23,7 @@ variable "target_group_arn" {
   type        = string
 }
 
-# ========================
 # Compute
-# ========================
 variable "ami_id" {
   description = "AMI ID for EC2 instances"
   type        = string
@@ -62,10 +54,7 @@ variable "desired_capacity" {
   description = "Desired number of instances in Auto Scaling Group"
   type        = number
 }
-
-# ========================
 # Auto Scaling Policies
-# ========================
 variable "scale_up_cpu_threshold" {
   description = "CPU threshold (%) to trigger scale up"
   type        = number
