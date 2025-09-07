@@ -1,0 +1,76 @@
+name: Terraform Prod
+
+on:
+  pull_request:
+    branches:
+      - prod   # Plan runs when PR targets prod branch
+  push:
+    branches:
+      - prod   # Apply runs after merge to prod
+
+jobs:
+  terraform-plan:
+    name: Terraform Plan (Prod)
+    runs-on: ubuntu-latest
+    environment: prod   # <-- links this job to GitHub 'prod' environment
+    if: github.event_name == 'pull_request'
+    permissions:
+      id-token: write   # For OIDC
+      contents: read
+      pull-requests: write   # Needed to comment plan on PR
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TERRAFORM_ROLE_ARN_PROD }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Init Terraform
+        run: terraform init -backend-config=backend.tfvars
+
+      - name: Terraform Plan
+        run: terraform plan -var-file=prod.tfvars -out=tfplan
+
+      - name: Comment Plan on PR
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          path: tfplan
+
+  terraform-apply:
+    name: Terraform Apply (Prod)
+    runs-on: ubuntu-latest
+    environment: prod   # <-- links this job to GitHub 'prod' environment
+    if: github.event_name == 'push' && github.ref == 'refs/heads/prod'
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TERRAFORM_ROLE_ARN_PROD }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.9.5
+
+      - name: Init Terraform
+        run: terraform init -backend-config=backend.tfvars
+
+      - name: Terraform Apply
+        run: terraform apply -auto-approve -var-file=prod.tfvars

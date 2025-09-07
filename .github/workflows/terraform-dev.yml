@@ -1,0 +1,50 @@
+name: Terraform Dev
+
+on:
+  pull_request:
+    branches:
+      - dev
+  push:
+    branches:
+      - dev
+
+jobs:
+  terraform-dev:
+    runs-on: ubuntu-latest
+    environment: dev   # <-- links this job to GitHub 'dev' environment
+
+    permissions:
+      id-token: write
+      contents: read
+
+    env:
+      TF_IN_AUTOMATION: true
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.TERRAFORM_ROLE_ARN_DEV }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
+      - name: Init Terraform
+        run: terraform init -backend-config="backend.tfvars"
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate
+
+      - name: Terraform Plan
+        run: terraform plan -var-file="terraform.tfvars"
+
+      - name: Terraform Apply (on push only)
+        if: github.event_name == 'push'
+        run: terraform apply -auto-approve -var-file="terraform.tfvars"
