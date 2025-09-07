@@ -12,7 +12,7 @@ jobs:
   terraform-plan:
     name: Terraform Plan (Prod)
     runs-on: ubuntu-latest
-    environment: prod   # <-- links this job to GitHub 'prod' environment
+    environment: prod   # <-- links this job to GitHub 'prod' environmenttt
     if: github.event_name == 'pull_request'
     permissions:
       id-token: write   # For OIDC
