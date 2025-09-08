@@ -18,24 +18,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # -------------------------
-      # Debug INFRACOST_API_KEY
-      # -------------------------
-      - name: Debug INFRACOST_API_KEY
-        run: |
-          if [ -z "${{ secrets.INFRACOST_API_KEY }}" ]; then
-            echo "ERROR: INFRACOST_API_KEY is NOT set!"
-            exit 1
-          else
-            echo "INFRACOST_API_KEY is set correctly."
-          fi
-
       - name: Run Infracost
         uses: infracost/actions/setup@v2
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: Generate Infracost cost estimate
+        env:
+          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}  # <-- properly scoped
         run: |
           cd environments/dev
           infracost breakdown --path . --format json --out-file infracost.json
