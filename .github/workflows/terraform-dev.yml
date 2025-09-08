@@ -10,42 +10,25 @@ on:
 
 jobs:
   # -------------------------
-  # Security checks (optional)
-  # Uncomment these for stricter DevSecOps enforcement
-  # -------------------------
-  # security-checks:
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #
-  #     - name: Run Checkov
-  #       uses: bridgecrewio/checkov-action@v12
-  #       with:
-  #         directory: environments/dev
-  #         framework: terraform
-  #         skip_check: CKV_AWS_79,CKV_AWS_126
-  #
-  #     - name: Run tfsec
-  #       uses: aquasecurity/tfsec-action@v1.0.3
-  #       with:
-  #         working_directory: environments/dev
-  #
-  #     - name: Run Terrascan
-  #       uses: tenable/terrascan-action@main
-  #       with:
-  #         iac_type: 'terraform'
-  #         iac_dir: 'environments/dev'
-
-  # -------------------------
   # Cost analysis
   # -------------------------
   cost-analysis:
     runs-on: ubuntu-latest
-    # If you uncomment security-checks in future, you can add: needs: security-checks
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      # -------------------------
+      # Debug INFRACOST_API_KEY
+      # -------------------------
+      - name: Debug INFRACOST_API_KEY
+        run: |
+          if [ -z "${{ secrets.INFRACOST_API_KEY }}" ]; then
+            echo "ERROR: INFRACOST_API_KEY is NOT set!"
+            exit 1
+          else
+            echo "INFRACOST_API_KEY is set correctly."
+          fi
 
       - name: Run Infracost
         uses: infracost/actions/setup@v2
@@ -63,7 +46,7 @@ jobs:
   terraform-dev:
     runs-on: ubuntu-latest
     environment: dev
-    needs: cost-analysis  # only depends on cost-analysis for now
+    needs: cost-analysis
 
     permissions:
       id-token: write
@@ -102,14 +85,40 @@ jobs:
         run: terraform plan -var-file=terraform.tfvars -out=tfplan
 
       # -------------------------
-      # Conftest (optional policy checks)
+      # Optional: Conftest (policy checks)
       # -------------------------
-      - name: Run Conftest
-        uses: instrumenta/conftest-action@master
-        with:
-          files: environments/dev/tfplan
-          policy: policy/
-        # You can comment this out if you want no policy enfoorcement in dev
+      # - name: Run Conftest
+      #   uses: instrumenta/conftest-action@master
+      #   with:
+      #     files: environments/dev/tfplan
+      #     policy: policy/
+
+      # -------------------------
+      # Optional: Security checks (uncomment for strict DevSecOps)
+      # -------------------------
+      # security-checks:
+      #   runs-on: ubuntu-latest
+      #   steps:
+      #     - name: Checkout code
+      #       uses: actions/checkout@v4
+      #
+      #     - name: Run Checkov
+      #       uses: bridgecrewio/checkov-action@v12
+      #       with:
+      #         directory: environments/dev
+      #         framework: terraform
+      #         skip_check: CKV_AWS_79,CKV_AWS_126
+      #
+      #     - name: Run tfsec
+      #       uses: aquasecurity/tfsec-action@v1.0.3
+      #       with:
+      #         working_directory: environments/dev
+      #
+      #     - name: Run Terrascan
+      #       uses: tenable/terrascan-action@main
+      #       with:
+      #         iac_type: 'terraform'
+      #         iac_dir: 'environments/dev'
 
       - name: Terraform Apply (on push only)
         if: github.event_name == 'push'
