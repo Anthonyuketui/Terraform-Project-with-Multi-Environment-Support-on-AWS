@@ -34,6 +34,13 @@ jobs:
           echo "Decoded token claims:"
           echo $TOKEN | jq -R 'split(".") | .[1] | @base64d | fromjson'
 
+
+      - name: Debug role ARN
+        run: |
+          echo "Using role ARN: ${{ secrets.TERRAFORM_ROLE_ARN }}"
+          echo "AWS region: ${{ vars.AWS_REGION }}"
+
+
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
