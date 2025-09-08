@@ -109,7 +109,7 @@ jobs:
         with:
           files: environments/dev/tfplan
           policy: policy/
-        # You can comment this out if you want no policy enforcement in dev
+        # You can comment this out if you want no policy enfoorcement in dev
 
       - name: Terraform Apply (on push only)
         if: github.event_name == 'push'
