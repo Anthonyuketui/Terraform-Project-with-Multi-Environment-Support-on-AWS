@@ -14,6 +14,7 @@ jobs:
   # -------------------------
   cost-analysis:
     runs-on: ubuntu-latest
+    environment: dev
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -24,12 +25,9 @@ jobs:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
       - name: Generate Infracost cost estimate
-        env:
-          INFRACOST_API_KEY: ${{ secrets.INFRACOST_API_KEY }}  # <-- properly scoped
         run: |
           cd environments/dev
           infracost breakdown --path . --format json --out-file infracost.json
-
   # -------------------------
   # Terraform Dev
   # -------------------------
