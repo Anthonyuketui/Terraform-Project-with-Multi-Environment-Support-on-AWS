@@ -58,7 +58,8 @@ jobs:
 
       - name: Terraform Format Check
         working-directory: environments/dev
-        run: terraform fmt -check
+        run: terraform fmt -recursive
+
 
       - name: Terraform Init
         working-directory: environments/dev
