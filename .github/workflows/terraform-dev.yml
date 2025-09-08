@@ -9,9 +9,6 @@ on:
       - dev
 
 jobs:
-  # -------------------------
-  # Cost analysis
-  # -------------------------
   cost-analysis:
     runs-on: ubuntu-latest
     environment: dev
@@ -19,15 +16,50 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+
       - name: Run Infracost
         uses: infracost/actions/setup@v2
         with:
           api-key: ${{ secrets.INFRACOST_API_KEY }}
 
-      - name: Generate Infracost cost estimate
+      - name: Generate Infracost diff
         run: |
           cd environments/dev
-          infracost breakdown --path . --format json --out-file infracost.json
+          terraform init -backend=false
+          infracost breakdown --path . \
+            --format table \
+            --out-file cost-estimate.txt
+
+      - name: Output cost estimate
+        run: cat environments/dev/cost-estimate.txt
+        
+      - name: Post cost estimate on PR
+        if: github.event_name == 'pull_request'
+        run: |
+          body="#### Infracost Estimate
+          \`\`\`
+          $(cat environments/dev/cost-estimate.txt)
+          \`\`\`"
+          
+          echo "comment=${body}" >> $GITHUB_OUTPUT
+        id: cost_estimate
+
+      - name: Add PR comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const body = `${{ steps.cost_estimate.outputs.comment }}`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+  # ...existing code...
   # -------------------------
   # Terraform Dev
   # -------------------------
