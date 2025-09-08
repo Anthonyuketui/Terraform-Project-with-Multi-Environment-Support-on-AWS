@@ -28,6 +28,7 @@ terraform.rc
 # Sensitive variable files
 *.tfvars
 *.tfvars.json
+!backend.tfvars
 
 # Ignore provider binaries that sometimes get into repo
 terraform-provider-*
