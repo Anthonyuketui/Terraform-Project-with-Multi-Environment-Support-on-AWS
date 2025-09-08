@@ -51,7 +51,7 @@ jobs:
         uses: hashicorp/setup-terraform@v3
 
       - name: Terraform Init
-        run: terraform -chdir=environments/dev init -backend-config="environments/dev/backend.tfvars"
+        run: terraform -chdir=environments/dev init -backend-config="backend.tfvars"
 
       - name: Terraform Plan
         run: terraform -chdir=environments/dev plan -var-file="terraform.tfvars"
