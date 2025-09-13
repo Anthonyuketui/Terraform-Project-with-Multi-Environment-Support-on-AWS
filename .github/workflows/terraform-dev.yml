@@ -31,7 +31,6 @@ jobs:
           infracost breakdown --path . \
             --format table \
             --out-file cost-estimate.txt
-
       - name: Output cost estimate
         run: cat environments/dev/cost-estimate.txt
         
@@ -59,10 +58,6 @@ jobs:
               body: body
             });
 
-  # ...existing code...
-  # -------------------------
-  # Terraform Devv
-  # -------------------------
   terraform-dev:
     runs-on: ubuntu-latest
     environment: dev
